@@ -1,20 +1,30 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createContact } from '../api';
 
 function Contact() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: '', lastName: '', email: '', phone: '', message: ''
+    firstname: '', lastname: '', email: '', position: '', company: ''
   });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    navigate('/');
+    setError('');
+    setSuccess('');
+    try {
+      await createContact(formData);
+      setSuccess('Message sent successfully!');
+      setFormData({ firstname: '', lastname: '', email: '', position: '', company: '' });
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -83,26 +93,28 @@ function Contact() {
 
         <section className="contact-form-section">
           <h2>Send Me a Message</h2>
+          {error && <p className="error-msg">{error}</p>}
+          {success && <p className="success-msg">{success}</p>}
           <form onSubmit={handleSubmit} className="contact-form">
             <div className="form-group">
-              <label htmlFor="firstName">First Name *</label>
-              <input type="text" id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} required placeholder="Your first name"/>
+              <label htmlFor="firstname">First Name *</label>
+              <input type="text" id="firstname" name="firstname" value={formData.firstname} onChange={handleChange} required placeholder="Your first name"/>
             </div>
             <div className="form-group">
-              <label htmlFor="lastName">Last Name *</label>
-              <input type="text" id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} required placeholder="Your last name"/>
+              <label htmlFor="lastname">Last Name *</label>
+              <input type="text" id="lastname" name="lastname" value={formData.lastname} onChange={handleChange} required placeholder="Your last name"/>
             </div>
             <div className="form-group">
               <label htmlFor="email">Email Address *</label>
               <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required placeholder="Your email"/>
             </div>
             <div className="form-group">
-              <label htmlFor="phone">Contact Number</label>
-              <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange} placeholder="Your phone number"/>
+              <label htmlFor="position">Position *</label>
+              <input type="text" id="position" name="position" value={formData.position} onChange={handleChange} required placeholder="Your position"/>
             </div>
             <div className="form-group form-group-full">
-              <label htmlFor="message">Message *</label>
-              <textarea id="message" name="message" value={formData.message} onChange={handleChange} required rows="5" placeholder="Tell me about your project..."/>
+              <label htmlFor="company">Company *</label>
+              <input type="text" id="company" name="company" value={formData.company} onChange={handleChange} required placeholder="Your company"/>
             </div>
             <div className="form-group form-group-full">
               <button type="submit" className="submit-button">Send Message</button>
